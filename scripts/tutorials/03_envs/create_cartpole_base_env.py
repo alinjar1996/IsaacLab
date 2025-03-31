@@ -160,6 +160,7 @@ def main():
             obs, _ = env.step(joint_efforts)
             # print current orientation of pole
             print("[Env 0]: Pole joint: ", obs["policy"][0][1].item())
+            print("[Env 1]: Pole joint: ", obs["policy"][1][1].item())
             # update counter
             count += 1
 

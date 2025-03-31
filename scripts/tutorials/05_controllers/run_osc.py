@@ -344,12 +344,15 @@ def update_states(
     ee_force_w = torch.zeros(scene.num_envs, 3, device=sim.device)
     sim_dt = sim.get_physics_dt()
     contact_forces.update(sim_dt)  # update contact sensor
+    
     # Calculate the contact force by averaging over last four time steps (i.e., to smoothen) and
     # taking the max of three surfaces as only one should be the contact of interest
     ee_force_w, _ = torch.max(torch.mean(contact_forces.data.net_forces_w_history, dim=1), dim=1)
 
     # This is a simplification, only for the sake of testing.
     ee_force_b = ee_force_w
+
+    print("ee_force_b", ee_force_b)
 
     # Get joint positions and velocities
     joint_pos = robot.data.joint_pos[:, arm_joint_ids]
