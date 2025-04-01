@@ -159,7 +159,6 @@ def main():
             joint_efforts = torch.randn_like(env.action_manager.action)
             #joint_efforts = torch.full_like(env.action_manager.action, 0.5)
             #joint_efforts = torch.zeros_like(env.action_manager.action)
-            print("joint_efforts", joint_efforts)
             # step the environment
             start = time.time()
             obs, _ = env.step(joint_efforts)
