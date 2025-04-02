@@ -19,6 +19,7 @@ scene, action, observation and event managers to create an environment.
 import argparse
 
 from isaaclab.app import AppLauncher
+#from isaaclab.sensors import ContactSensorCfg
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Tutorial on creating a cartpole base environment.")
@@ -46,8 +47,13 @@ from isaaclab.managers import ObservationGroupCfg as ObsGroup
 from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils import configclass
+from isaaclab.terrains import TerrainImporterCfg
 
 from isaaclab_tasks.manager_based.classic.husky.husky_env_cfg import HuskySceneCfg
+
+# Pre-defined configs
+##
+from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 
 
 @configclass
@@ -68,6 +74,13 @@ class ObservationsCfg:
         # observation terms (order preserved)
         joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel)
+         # Add contact forces observation
+        # contact_forces = ObsTerm(func=mdp.contact_forces,
+        #      params={
+        #     "threshold": 0.01,  # Minimum force threshold to register a contact
+        #     "sensor_cfg": SceneEntityCfg("robot", body_names=["front_left_wheel_link", "front_right_wheel_link", 
+        #                                                        "rear_left_wheel_link", "rear_right_wheel_link"])
+        # })
 
         def __post_init__(self) -> None:
             self.enable_corruption = False

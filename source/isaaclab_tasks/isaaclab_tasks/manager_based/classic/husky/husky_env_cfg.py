@@ -16,6 +16,7 @@ from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.utils import configclass
+from isaaclab.terrains import TerrainImporterCfg
 
 import isaaclab_tasks.manager_based.classic.husky.mdp as mdp
 
@@ -23,6 +24,7 @@ import isaaclab_tasks.manager_based.classic.husky.mdp as mdp
 # Pre-defined configs
 ##
 from isaaclab_assets.robots.husky import HUSKY_CFG  # isort:skip
+from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 
 
 ##
@@ -34,11 +36,28 @@ from isaaclab_assets.robots.husky import HUSKY_CFG  # isort:skip
 class HuskySceneCfg(InteractiveSceneCfg):
     """Configuration for a cart-pole scene."""
 
-    # ground plane
-    ground = AssetBaseCfg(
+    # # ground plane
+    # ground = AssetBaseCfg(
+    #     prim_path="/World/ground",
+    #     spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
+    # )
+
+    # add terrain
+    terrain = TerrainImporterCfg(
         prim_path="/World/ground",
-        spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
+        terrain_type="generator",
+        terrain_generator=ROUGH_TERRAINS_CFG,
+        max_init_terrain_level=5,
+        collision_group=-1,
+        physics_material=sim_utils.RigidBodyMaterialCfg(
+            friction_combine_mode="multiply",
+            restitution_combine_mode="multiply",
+            static_friction=1.0,
+            dynamic_friction=1.0,
+        ),
+        debug_vis=False,
     )
+
 
     # cartpole
     robot: ArticulationCfg = HUSKY_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
@@ -135,7 +154,7 @@ class TerminationsCfg:
     # (2) Cart out of bounds
     cart_out_of_bounds = DoneTerm(
         func=mdp.joint_pos_out_of_manual_limit,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["front_left_wheel"]), "bounds": (-3.0, 3.0)},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel"]), "bounds": (-3.0, 3.0)},
     )
 
 
@@ -145,7 +164,7 @@ class TerminationsCfg:
 
 
 @configclass
-class CartpoleEnvCfg(ManagerBasedRLEnvCfg):
+class HuskyEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the cartpole environment."""
 
     # Scene settings
