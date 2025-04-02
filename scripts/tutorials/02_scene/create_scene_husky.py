@@ -60,7 +60,7 @@ class HuskySceneCfg(InteractiveSceneCfg):
     
     # Husky asset
     husky = ArticulationCfg(
-    prim_path="{ENV_REGEX_NS}/husky",
+    prim_path="{ENV_REGEX_NS}/Robot",
     spawn=sim_utils.UsdFileCfg(usd_path="/home/ims/isaacsim/IsaacLab/husky_description/urdf/husky_temp/husky_temp.usd"),
     actuators={
         "front_left_wheel": ActuatorBaseCfg(

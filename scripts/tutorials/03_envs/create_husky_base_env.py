@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """
-This script demonstrates how to create a simple environment with a cartpole. It combines the concepts of
+This script demonstrates how to create a simple environment with a husky. It combines the concepts of
 scene, action, observation and event managers to create an environment.
 
 .. code-block:: bash
 
-    ./isaaclab.sh -p scripts/tutorials/03_envs/create_cartpole_base_env.py --num_envs 32
+    ./isaaclab.sh -p scripts/tutorials/03_envs/create_husky_base_env.py --num_envs 32
 
 """
 
@@ -47,14 +47,14 @@ from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils import configclass
 
-from isaaclab_tasks.manager_based.classic.cartpole.cartpole_env_cfg import CartpoleSceneCfg
+from isaaclab_tasks.manager_based.classic.husky.husky_env_cfg import HuskySceneCfg
 
 
 @configclass
 class ActionsCfg:
     """Action specifications for the environment."""
 
-    joint_efforts = mdp.JointEffortActionCfg(asset_name="robot", joint_names=["slider_to_cart"], scale=5.0)
+    joint_efforts = mdp.JointEffortActionCfg(asset_name="robot", joint_names=[".*_wheel"], scale=5.0)
 
 
 @configclass
@@ -82,36 +82,28 @@ class EventCfg:
     """Configuration for events."""
 
     # on startup
-    add_pole_mass = EventTerm(
+    add_base_mass = EventTerm(
         func=mdp.randomize_rigid_body_mass,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=["pole"]),
+            "asset_cfg": SceneEntityCfg("robot", body_names=["base_link"]),
             "mass_distribution_params": (0.1, 0.5),
             "operation": "add",
         },
     )
 
     # on reset
-    reset_cart_position = EventTerm(
+    reset_wheel_position = EventTerm(
         func=mdp.reset_joints_by_offset,
         mode="reset",
         params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=["slider_to_cart"]),
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel"]),
             "position_range": (-1.0, 1.0),
             "velocity_range": (-0.1, 0.1),
         },
     )
 
-    reset_pole_position = EventTerm(
-        func=mdp.reset_joints_by_offset,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=["cart_to_pole"]),
-            "position_range": (-0.125 * math.pi, 0.125 * math.pi),
-            "velocity_range": (-0.01 * math.pi, 0.01 * math.pi),
-        },
-    )
+
 
 
 @configclass
@@ -119,7 +111,7 @@ class CartpoleEnvCfg(ManagerBasedEnvCfg):
     """Configuration for the cartpole environment."""
 
     # Scene settings
-    scene = CartpoleSceneCfg(num_envs=1024, env_spacing=2.5)
+    scene = HuskySceneCfg(num_envs=1024, env_spacing=2.5)
     # Basic settings
     observations = ObservationsCfg()
     actions = ActionsCfg()
@@ -159,6 +151,7 @@ def main():
             joint_efforts = torch.randn_like(env.action_manager.action)
             #joint_efforts = torch.full_like(env.action_manager.action, 0.5)
             #joint_efforts = torch.zeros_like(env.action_manager.action)
+            print("joint_efforts", joint_efforts)
             # step the environment
             start = time.time()
             obs, _ = env.step(joint_efforts)
