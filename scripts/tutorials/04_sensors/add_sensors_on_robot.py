@@ -152,6 +152,10 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         print(scene["contact_forces"])
         print("Received max contact force of: ", torch.max(scene["contact_forces"].data.net_forces_w).item())
 
+        print("Received contact forces:")
+        print(scene["contact_forces"].data.net_forces_w.tolist())  # Convert tensor to list for clean output
+
+
 
 def main():
     """Main function."""
