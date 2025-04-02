@@ -38,6 +38,7 @@ from isaaclab.scene import InteractiveScene, InteractiveSceneCfg
 from isaaclab.sim import SimulationContext
 from isaaclab.utils import configclass
 from isaaclab.actuators import ActuatorBaseCfg
+from isaaclab.actuators import actuator_pd
 
 @configclass
 class HuskySceneCfg(InteractiveSceneCfg):
@@ -65,28 +66,29 @@ class HuskySceneCfg(InteractiveSceneCfg):
         "front_left_wheel": ActuatorBaseCfg(
             joint_names_expr="front_left_wheel",
             effort_limit=100.0,
-            class_type="position",
+            class_type=actuator_pd.IdealPDActuator,
+            #class_type=actuator_pd.IdealPDActuator,
             stiffness=500.0,
             damping=50.0
         ),
         "front_right_wheel": ActuatorBaseCfg(
             joint_names_expr="front_right_wheel",
             effort_limit=100.0,
-            class_type="position",
+            class_type=actuator_pd.IdealPDActuator,
             stiffness=500.0,
             damping=50.0
         ),
         "rear_left_wheel": ActuatorBaseCfg(
             joint_names_expr="rear_left_wheel",
             effort_limit=100.0,
-            class_type="position",
+            class_type=actuator_pd.IdealPDActuator,
             stiffness=500.0,
             damping=50.0
         ),
         "rear_right_wheel": ActuatorBaseCfg(
             joint_names_expr="rear_right_wheel",
             effort_limit=100.0,
-            class_type="position",
+            class_type=actuator_pd.IdealPDActuator,
             stiffness=500.0,
             damping=50.0
         )
