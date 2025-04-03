@@ -111,14 +111,14 @@ class MySceneCfg(InteractiveSceneCfg):
         mesh_prim_paths=["/World/ground"],
     )
 
+    
+
     contact_forces = ContactSensorCfg(
         prim_path="{ENV_REGEX_NS}/Robot/.*_FOOT", 
         update_period=0.01, 
         history_length=6, 
         debug_vis=True
     )
-
-    
 
 
     # lights
@@ -144,6 +144,7 @@ class ActionsCfg:
 class ObservationsCfg:
     """Observation specifications for the MDP."""
 
+
     @configclass
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
@@ -165,6 +166,11 @@ class ObservationsCfg:
             noise=Unoise(n_min=-0.1, n_max=0.1),
             clip=(-1.0, 1.0),
         )
+        # contact_forces = ObsTerm(
+        # func=mdp.contact_forces,
+        # params={"sensor_cfg": SceneEntityCfg("contact_forces"),
+        #         "threshold": 0.1},
+        # )
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -238,10 +244,27 @@ def main():
                 count = 0
                 print("-" * 80)
                 print("[INFO]: Resetting environment...")
+   
             # infer action
             action = policy(obs["policy"])
             # step env
             obs, _ = env.step(action)
+
+            # Print contact forces every 20 steps
+            if count % 5 == 0:
+                try:
+                    # Access contact forces using dictionary-style access
+                    print("-" * 40)
+                    print("[INFO] Contact forces at step", count)
+                    print("Contact sensor info:", env.scene["contact_forces"])
+                    # Access the contact force data
+                    contact_forces = env.scene["contact_forces"].data.net_forces_w
+                    print("Contact forces shape:", contact_forces.shape)
+                    print("Contact forces:", contact_forces.tolist())  # Convert tensor to list for clean output
+                    print("Max contact force:", torch.max(contact_forces).item())
+                    print("-" * 40)
+                except Exception as e:
+                    print(f"Error accessing contact forces: {e}")
             # update counter
             count += 1
 
