@@ -17,6 +17,7 @@ from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.utils import configclass
 from isaaclab.terrains import TerrainImporterCfg
+from isaaclab.sensors import ContactSensorCfg
 
 import isaaclab_tasks.manager_based.classic.husky.mdp as mdp
 
@@ -61,6 +62,15 @@ class HuskySceneCfg(InteractiveSceneCfg):
 
     # cartpole
     robot: ArticulationCfg = HUSKY_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+
+    #sensors
+
+    contact_forces = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/.*_wheel_link", 
+        update_period=0.01, 
+        history_length=6, 
+        debug_vis=True
+    )
 
     # lights
     dome_light = AssetBaseCfg(

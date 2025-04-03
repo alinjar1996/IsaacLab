@@ -21,6 +21,7 @@ HUSKY_CFG = ArticulationCfg(
     prim_path="{ENV_REGEX_NS}/husky",
     spawn=sim_utils.UsdFileCfg(
         usd_path=f"/home/ims/isaacsim/IsaacLab/husky_description/urdf/husky_temp/husky_temp.usd",
+        activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
             max_depenetration_velocity=10.0,
