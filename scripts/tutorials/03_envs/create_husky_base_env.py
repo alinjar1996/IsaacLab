@@ -78,6 +78,9 @@ class ActionsCfg:
 
     joint_efforts = mdp.JointEffortActionCfg(asset_name="robot", joint_names=[".*_wheel"], scale=5.0)
 
+    joint_positions = mdp.JointPositionActionCfg(asset_name="robot",joint_names=[".*_wheel"],scale=1.0)
+
+
 
 @configclass
 class ObservationsCfg:
@@ -110,27 +113,27 @@ class ObservationsCfg:
 class EventCfg:
     """Configuration for events."""
 
-    # on startup
-    add_base_mass = EventTerm(
-        func=mdp.randomize_rigid_body_mass,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=["base_link"]),
-            "mass_distribution_params": (0.1, 0.5),
-            "operation": "add",
-        },
-    )
+    # # on startup
+    # add_base_mass = EventTerm(
+    #     func=mdp.randomize_rigid_body_mass,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=["base_link"]),
+    #         "mass_distribution_params": (0.1, 0.5),
+    #         "operation": "add",
+    #     },
+    # )
 
-    # on reset
-    reset_wheel_position = EventTerm(
-        func=mdp.reset_joints_by_offset,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel"]),
-            "position_range": (-1.0, 1.0),
-            "velocity_range": (-0.1, 0.1),
-        },
-    )
+    # # on reset
+    # reset_wheel_position = EventTerm(
+    #     func=mdp.reset_joints_by_offset,
+    #     mode="reset",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel"]),
+    #         "position_range": (-1.0, 1.0),
+    #         "velocity_range": (-0.1, 0.1),
+    #     },
+    # )
 
 
 
@@ -180,33 +183,49 @@ def main():
                 print("[INFO]: Resetting environment...")
             # sample random actions
             #joint_efforts = torch.randn_like(env.action_manager.action)
-            joint_efforts = torch.full_like(env.action_manager.action, 0.5)
+            joint_efforts = torch.full_like(env.action_manager.action, -10)
+            joint_efforts[:, [0, 2]] = -10.0  # left wheels
+            joint_efforts[:, [1, 3]] = 10.0   # right wheels
             #joint_efforts = torch.zeros_like(env.action_manager.action)
-            print("joint_efforts", joint_efforts)
+            #print("joint_efforts", joint_efforts)
             # step the environment
-            start = time.time()
-            obs, _ = env.step(joint_efforts)
-            end = time.time()
-            time_taken = end - start
-            print("time_taken", time_taken)
-            print("count", count)
+            #start = time.time()
+            # Inside while loop in main()
+            target_position = torch.full_like(env.action_manager.action, count * 0.025)  # slowly increases over time
+            obs, _ = env.step(target_position)
+            #obs, _ = env.step(joint_efforts)
+            #end = time.time()
+            #time_taken = end - start
+            #print("time_taken", time_taken)
+            #print("count", count)
             # print current orientation of pole
             #print("[Env 0]: Pole joint: ", obs["policy"][0][1].item())
            #print("[Env 1]: Pole joint: ", obs["policy"][1][1].item())
             # update counter
             # Print contact forces every 20 steps
-            if count % 20 == 0:
+            if count % 1 == 0:
                 try:
                     # Access contact forces using dictionary-style access
                     print("-" * 40)
-                    print("[INFO] Contact forces at step", count)
-                    print("Contact sensor info:", env.scene["contact_forces"])
+                    #print("[INFO] Contact forces at step", count)
+                    #print("Contact sensor info:", env.scene["contact_forces"])
                     # Access the contact force data
                     contact_forces = env.scene["contact_forces"].data.net_forces_w
                     print("Contact forces shape:", contact_forces.shape)
                     print("Contact forces:", contact_forces.tolist())  # Convert tensor to list for clean output
                     print("Max contact force:", torch.max(contact_forces).item())
                     print("-" * 40)
+                    # Calculate force sums for all robots
+                    num_envs = contact_forces.shape[0]  # Get number of environments from tensor shape
+                    print(f"Processing contact forces for {num_envs} robots:")
+
+                    for robot_idx in range(num_envs):
+                        # Sum X, Y, Z components separately for each robot
+                        x_sum = contact_forces[robot_idx, :, 0].sum().item()
+                        y_sum = contact_forces[robot_idx, :, 1].sum().item()
+                        z_sum = contact_forces[robot_idx, :, 2].sum().item()
+                        
+                        print(f"Robot {robot_idx} total forces - X: {x_sum:.2f}, Y: {y_sum:.2f}, Z: {z_sum:.2f}")
                 except Exception as e:
                     print(f"Error accessing contact forces: {e}")
             count += 1

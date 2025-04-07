@@ -69,7 +69,7 @@ class HuskySceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/Robot/.*_wheel_link", 
         update_period=0.01, 
         history_length=6, 
-        debug_vis=True
+        debug_vis=False
     )
 
     # lights
