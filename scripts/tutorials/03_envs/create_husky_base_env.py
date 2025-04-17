@@ -15,7 +15,7 @@ scene, action, observation and event managers to create an environment.
 
 """Launch Isaac Sim Simulator first."""
 
-
+import numpy as np
 import argparse
 
 from isaaclab.app import AppLauncher
@@ -39,6 +39,8 @@ simulation_app = app_launcher.app
 import math
 import torch
 import time
+
+import pandas as pd
 
 
 import isaaclab.sim as sim_utils
@@ -162,8 +164,21 @@ class HuskyEnvCfg(ManagerBasedEnvCfg):
         self.concatenate_terms = True
 
 
+import pandas as pd
+import torch
+
+# Global variable to control whether to write the header
+header_written = False
+
+import pandas as pd
+import torch
+
+# Global variable to control whether to write the header
+header_written = False
+
 def main():
     """Main function."""
+    global header_written
     # parse the arguments
     env_cfg = HuskyEnvCfg()
     env_cfg.scene.num_envs = args_cli.num_envs
@@ -181,61 +196,93 @@ def main():
                 env.reset()
                 print("-" * 80)
                 print("[INFO]: Resetting environment...")
-            # sample random actions
-            #joint_efforts = torch.randn_like(env.action_manager.action)
+            
+            # Sample random actions
             joint_efforts = torch.full_like(env.action_manager.action, -10)
             joint_efforts[:, [0, 2]] = -10.0  # left wheels
             joint_efforts[:, [1, 3]] = 10.0   # right wheels
-            #joint_efforts = torch.zeros_like(env.action_manager.action)
-            #print("joint_efforts", joint_efforts)
-            # step the environment
-            #start = time.time()
+
             # Inside while loop in main()
-            target_position = torch.full_like(env.action_manager.action, count * 0.025)  # slowly increases over time
+            target_position = torch.full_like(env.action_manager.action, count * 0.0)  # slowly increases over time
             obs, _ = env.step(target_position)
-            #obs, _ = env.step(joint_efforts)
-            #end = time.time()
-            #time_taken = end - start
-            #print("time_taken", time_taken)
-            #print("count", count)
-            # print current orientation of pole
-            #print("[Env 0]: Pole joint: ", obs["policy"][0][1].item())
-           #print("[Env 1]: Pole joint: ", obs["policy"][1][1].item())
-            # update counter
-            # Print contact forces every 20 steps
+
+            # Print contact forces every 1 step
             if count % 1 == 0:
                 try:
                     # Access contact forces using dictionary-style access
                     print("-" * 40)
-                    #print("[INFO] Contact forces at step", count)
-                    #print("Contact sensor info:", env.scene["contact_forces"])
                     # Access the contact force data
                     contact_forces = env.scene["contact_forces"].data.net_forces_w
+
+                    # Move tensor to CPU before converting to NumPy
+                    contact_forces_cpu = contact_forces.cpu().numpy()
+
+                    # Reshape the tensor from (1, 4, 3) to (4, 3)
+                    contact_forces_reshaped = contact_forces_cpu[0]  # The first (and only) element contains the forces for 4 wheels
+
+                    # Create a dictionary to organize the forces by wheel
+                    data_dict = {
+                        'wheel_1_Force_x': contact_forces_reshaped[0, 0],
+                        'wheel_1_Force_y': contact_forces_reshaped[0, 1],
+                        'wheel_1_Force_z': contact_forces_reshaped[0, 2],
+                        'wheel_2_Force_x': contact_forces_reshaped[1, 0],
+                        'wheel_2_Force_y': contact_forces_reshaped[1, 1],
+                        'wheel_2_Force_z': contact_forces_reshaped[1, 2],
+                        'wheel_3_Force_x': contact_forces_reshaped[2, 0],
+                        'wheel_3_Force_y': contact_forces_reshaped[2, 1],
+                        'wheel_3_Force_z': contact_forces_reshaped[2, 2],
+                        'wheel_4_Force_x': contact_forces_reshaped[3, 0],
+                        'wheel_4_Force_y': contact_forces_reshaped[3, 1],
+                        'wheel_4_Force_z': contact_forces_reshaped[3, 2],
+                    }
+
+                    # Convert the dictionary to a DataFrame
+                    contact_forces_df = pd.DataFrame([data_dict])
+
+                    # Open the CSV file in append mode, write header only once
+                    csv_filename = 'contact_forces.csv'
+                    with open(csv_filename, mode='a', newline='') as file:
+                        if not header_written:
+                            contact_forces_df.to_csv(file, header=True, index=False)
+                            header_written = True
+                        else:
+                            contact_forces_df.to_csv(file, header=False, index=False)
+
+                    print(f"Contact forces saved to {csv_filename}")
+
                     print("Contact forces shape:", contact_forces.shape)
+
+                    # Print forces for each wheel
+                    print("Wheel 1 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[0, 0], contact_forces_reshaped[0, 1], contact_forces_reshaped[0, 2]))
+                    print("Wheel 2 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[1, 0], contact_forces_reshaped[1, 1], contact_forces_reshaped[1, 2]))
+                    print("Wheel 3 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[2, 0], contact_forces_reshaped[2, 1], contact_forces_reshaped[2, 2]))
+                    print("Wheel 4 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[3, 0], contact_forces_reshaped[3, 1], contact_forces_reshaped[3, 2]))
+                    
+                    # Calculate sum of forces in X, Y, and Z directions across all wheels
+                    x_sum = contact_forces_reshaped[:, 0].sum()
+                    y_sum = contact_forces_reshaped[:, 1].sum()
+                    z_sum = contact_forces_reshaped[:, 2].sum()
+
+                    # Print the summed forces
+                    print("Total Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(x_sum, y_sum, z_sum))
+
                     print("Contact forces:", contact_forces.tolist())  # Convert tensor to list for clean output
                     print("Max contact force:", torch.max(contact_forces).item())
                     print("-" * 40)
-                    # Calculate force sums for all robots
-                    num_envs = contact_forces.shape[0]  # Get number of environments from tensor shape
-                    print(f"Processing contact forces for {num_envs} robots:")
 
-                    for robot_idx in range(num_envs):
-                        # Sum X, Y, Z components separately for each robot
-                        x_sum = contact_forces[robot_idx, :, 0].sum().item()
-                        y_sum = contact_forces[robot_idx, :, 1].sum().item()
-                        z_sum = contact_forces[robot_idx, :, 2].sum().item()
-                        
-                        print(f"Robot {robot_idx} total forces - X: {x_sum:.2f}, Y: {y_sum:.2f}, Z: {z_sum:.2f}")
                 except Exception as e:
                     print(f"Error accessing contact forces: {e}")
+
+            # Increment counter
             count += 1
 
-    # close the environment
+    # Close the environment
     env.close()
 
 
+
 if __name__ == "__main__":
-    # run the main function
+    # Run the main function
     main()
-    # close sim app
+    # Close the simulation app
     simulation_app.close()
