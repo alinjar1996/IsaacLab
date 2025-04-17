@@ -26,6 +26,7 @@ import isaaclab_tasks.manager_based.classic.husky.mdp as mdp
 ##
 from isaaclab_assets.robots.husky import HUSKY_CFG  # isort:skip
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
+from isaaclab.terrains.config.flat import FLAT_TERRAIN_CFG
 
 
 ##
@@ -47,7 +48,7 @@ class HuskySceneCfg(InteractiveSceneCfg):
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="generator",
-        terrain_generator=ROUGH_TERRAINS_CFG,
+        terrain_generator=FLAT_TERRAIN_CFG, #ROUGH_TERRAINS_CFG
         max_init_terrain_level=5,
         collision_group=-1,
         physics_material=sim_utils.RigidBodyMaterialCfg(
