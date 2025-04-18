@@ -19,7 +19,7 @@ import numpy as np
 import argparse
 
 from isaaclab.app import AppLauncher
-#from isaaclab.sensors import ContactSensorCfg
+
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Tutorial on creating a cartpole base environment.")
@@ -169,22 +169,25 @@ import torch
 
 # Global variable to control whether to write the header
 header_written = False
+header_written_pos = False
 
 import pandas as pd
 import torch
 
-# Global variable to control whether to write the header
-header_written = False
+
 
 def main():
     """Main function."""
     global header_written
+    global header_written_pos
     # parse the arguments
     env_cfg = HuskyEnvCfg()
     env_cfg.scene.num_envs = args_cli.num_envs
     env_cfg.sim.device = args_cli.device
     # setup base environment
     env = ManagerBasedEnv(cfg=env_cfg)
+    force_sensor = True
+    position_sensor = False
 
     # simulate physics
     count = 0
@@ -206,72 +209,131 @@ def main():
             target_position = torch.full_like(env.action_manager.action, count * 0.0)  # slowly increases over time
             obs, _ = env.step(target_position)
 
+
             # Print contact forces every 1 step
             if count % 1 == 0:
                 try:
                     # Access contact forces using dictionary-style access
                     print("-" * 40)
-                    # Access the contact force data
-                    contact_forces = env.scene["contact_forces"].data.net_forces_w
 
-                    # Move tensor to CPU before converting to NumPy
-                    contact_forces_cpu = contact_forces.cpu().numpy()
+                    if force_sensor == True:
+                        # Access the contact force data
+                        contact_forces = env.scene["contact_forces"].data.net_forces_w
 
-                    # Reshape the tensor from (1, 4, 3) to (4, 3)
-                    contact_forces_reshaped = contact_forces_cpu[0]  # The first (and only) element contains the forces for 4 wheels
 
-                    # Create a dictionary to organize the forces by wheel
-                    data_dict = {
-                        'wheel_1_Force_x': contact_forces_reshaped[0, 0],
-                        'wheel_1_Force_y': contact_forces_reshaped[0, 1],
-                        'wheel_1_Force_z': contact_forces_reshaped[0, 2],
-                        'wheel_2_Force_x': contact_forces_reshaped[1, 0],
-                        'wheel_2_Force_y': contact_forces_reshaped[1, 1],
-                        'wheel_2_Force_z': contact_forces_reshaped[1, 2],
-                        'wheel_3_Force_x': contact_forces_reshaped[2, 0],
-                        'wheel_3_Force_y': contact_forces_reshaped[2, 1],
-                        'wheel_3_Force_z': contact_forces_reshaped[2, 2],
-                        'wheel_4_Force_x': contact_forces_reshaped[3, 0],
-                        'wheel_4_Force_y': contact_forces_reshaped[3, 1],
-                        'wheel_4_Force_z': contact_forces_reshaped[3, 2],
-                    }
 
-                    # Convert the dictionary to a DataFrame
-                    contact_forces_df = pd.DataFrame([data_dict])
+                        # Move tensor to CPU before converting to NumPy
+                        contact_forces_cpu = contact_forces.cpu().numpy()
 
-                    # Open the CSV file in append mode, write header only once
-                    csv_filename = 'contact_forces.csv'
-                    with open(csv_filename, mode='a', newline='') as file:
-                        if not header_written:
-                            contact_forces_df.to_csv(file, header=True, index=False)
-                            header_written = True
-                        else:
-                            contact_forces_df.to_csv(file, header=False, index=False)
+                        
 
-                    print(f"Contact forces saved to {csv_filename}")
+                        # Reshape the tensor from (1, 4, 3) to (4, 3)
+                        contact_forces_reshaped = contact_forces_cpu[0]  # The first (and only) element contains the forces for 4 wheels
+                        
 
-                    print("Contact forces shape:", contact_forces.shape)
+                        # Create a dictionary to organize the forces by wheel
+                        data_dict = {
+                            'wheel_1_Force_x': contact_forces_reshaped[0, 0],
+                            'wheel_1_Force_y': contact_forces_reshaped[0, 1],
+                            'wheel_1_Force_z': contact_forces_reshaped[0, 2],
+                            'wheel_2_Force_x': contact_forces_reshaped[1, 0],
+                            'wheel_2_Force_y': contact_forces_reshaped[1, 1],
+                            'wheel_2_Force_z': contact_forces_reshaped[1, 2],
+                            'wheel_3_Force_x': contact_forces_reshaped[2, 0],
+                            'wheel_3_Force_y': contact_forces_reshaped[2, 1],
+                            'wheel_3_Force_z': contact_forces_reshaped[2, 2],
+                            'wheel_4_Force_x': contact_forces_reshaped[3, 0],
+                            'wheel_4_Force_y': contact_forces_reshaped[3, 1],
+                            'wheel_4_Force_z': contact_forces_reshaped[3, 2],
+                        
+                        }
 
-                    # Print forces for each wheel
-                    print("Wheel 1 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[0, 0], contact_forces_reshaped[0, 1], contact_forces_reshaped[0, 2]))
-                    print("Wheel 2 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[1, 0], contact_forces_reshaped[1, 1], contact_forces_reshaped[1, 2]))
-                    print("Wheel 3 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[2, 0], contact_forces_reshaped[2, 1], contact_forces_reshaped[2, 2]))
-                    print("Wheel 4 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[3, 0], contact_forces_reshaped[3, 1], contact_forces_reshaped[3, 2]))
-                    
-                    # Calculate sum of forces in X, Y, and Z directions across all wheels
-                    x_sum = contact_forces_reshaped[:, 0].sum()
-                    y_sum = contact_forces_reshaped[:, 1].sum()
-                    z_sum = contact_forces_reshaped[:, 2].sum()
+                        # Convert the dictionary to a DataFrame
+                        contact_forces_df = pd.DataFrame([data_dict])
+                        
 
-                    # Print the summed forces
-                    print("Total Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(x_sum, y_sum, z_sum))
+                        # Open the CSV file in append mode, write header only once
+                        csv_filename = 'contact_forces.csv'
+                        with open(csv_filename, mode='a', newline='') as file:
+                            if not header_written:
+                                contact_forces_df.to_csv(file, header=True, index=False)
+                                header_written = True
+                            else:
+                                contact_forces_df.to_csv(file, header=False, index=False)
 
-                    print("Contact forces:", contact_forces.tolist())  # Convert tensor to list for clean output
-                    print("Max contact force:", torch.max(contact_forces).item())
-                    print("-" * 40)
+                        print(f"Contact forces saved to {csv_filename}")              
+
+                        print("Contact forces shape:", contact_forces.shape)
+
+                        # Print forces for each wheel
+                        print("Wheel 1 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[0, 0], contact_forces_reshaped[0, 1], contact_forces_reshaped[0, 2]))
+                        print("Wheel 2 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[1, 0], contact_forces_reshaped[1, 1], contact_forces_reshaped[1, 2]))
+                        print("Wheel 3 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[2, 0], contact_forces_reshaped[2, 1], contact_forces_reshaped[2, 2]))
+                        print("Wheel 4 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[3, 0], contact_forces_reshaped[3, 1], contact_forces_reshaped[3, 2]))
+                        
+                        # Calculate sum of forces in X, Y, and Z directions across all wheels
+                        x_sum = contact_forces_reshaped[:, 0].sum()
+                        y_sum = contact_forces_reshaped[:, 1].sum()
+                        z_sum = contact_forces_reshaped[:, 2].sum()
+
+                        # Print the summed forces
+                        print("Total Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(x_sum, y_sum, z_sum))
+
+                        print("Contact forces:", contact_forces.tolist())  # Convert tensor to list for clean output
+                        print("Max contact force:", torch.max(contact_forces).item())
+                        print("-" * 40)
+
+                    if position_sensor == True:
+                        ## Pos
+                        contact_positions = env.scene["contact_forces"].data.pos_w
+
+                        print("Type:", type(contact_positions))
+
+                        contact_positions_cpu = contact_positions.cpu().numpy()
+
+                        contact_positions_reshaped = contact_positions_cpu[0]
+
+
+                        data_dict_pos ={
+                            'wheel_1_Position_x': contact_positions_reshaped[0, 0],
+                            'wheel_1_Position_y': contact_positions_reshaped[0, 1],
+                            'wheel_1_Position_z': contact_positions_reshaped[0, 2],
+                            'wheel_2_Position_x': contact_positions_reshaped[1, 0],
+                            'wheel_2_Position_y': contact_positions_reshaped[1, 1],
+                            'wheel_2_Position_z': contact_positions_reshaped[1, 2],
+                            'wheel_3_Position_x': contact_positions_reshaped[2, 0],
+                            'wheel_3_Position_y': contact_positions_reshaped[2, 1],
+                            'wheel_3_Position_z': contact_positions_reshaped[2, 2],
+                            'wheel_4_Position_x': contact_positions_reshaped[3, 0],
+                            'wheel_4_Position_y': contact_positions_reshaped[3, 1],
+                            'wheel_4_Position_z': contact_positions_reshaped[3, 2],
+                        }
+                        
+                        contact_pos_df = pd.DataFrame([data_dict_pos])
+
+                        csv_filename_pos = 'contact_positions.csv'
+                        with open(csv_filename_pos, mode='a', newline='') as file:
+                            if not header_written_pos:
+                                contact_pos_df.to_csv(file, header=True, index=False)
+                                header_written_pos = True
+                            else:
+                                contact_pos_df.to_csv(file, header=False, index=False)  
+
+                        print(f"Contact positions saved to {csv_filename_pos}")
+
+                        print("Contact positions shape:", contact_positions.shape())
+
+                        print("Contact positions:", contact_positions.tolist())  # Convert tensor to list for clean output
+
+                        # Print positions for each wheel
+                        print("Wheel 1 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[0, 0], contact_positions_reshaped[0, 1], contact_positions_reshaped[0, 2]))
+                        print("Wheel 2 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[1, 0], contact_positions_reshaped[1, 1], contact_positions_reshaped[1, 2]))
+                        print("Wheel 3 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[2, 0], contact_positions_reshaped[2, 1], contact_positions_reshaped[2, 2]))
+                        print("Wheel 4 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[3, 0], contact_positions_reshaped[3, 1], contact_positions_reshaped[3, 2]))
+                        print("-" * 40)
 
                 except Exception as e:
-                    print(f"Error accessing contact forces: {e}")
+                    print(f"Error accessing contact data: {e}")
 
             # Increment counter
             count += 1

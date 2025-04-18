@@ -18,6 +18,8 @@ import argparse
 
 from isaaclab.app import AppLauncher
 
+
+
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Tutorial on using the interactive scene interface with Husky.")
 parser.add_argument("--num_envs", type=int, default=2, help="Number of environments to spawn.")
