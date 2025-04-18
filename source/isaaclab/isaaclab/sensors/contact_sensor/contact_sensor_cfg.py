@@ -17,7 +17,7 @@ class ContactSensorCfg(SensorBaseCfg):
 
     class_type: type = ContactSensor
 
-    track_pose: bool = False
+    track_pose: bool = True
     """Whether to track the pose of the sensor's origin. Defaults to False."""
 
     track_air_time: bool = False

@@ -187,14 +187,14 @@ def main():
     # setup base environment
     env = ManagerBasedEnv(cfg=env_cfg)
     force_sensor = True
-    position_sensor = False
+    position_sensor = True
 
     # simulate physics
     count = 0
     while simulation_app.is_running():
         with torch.inference_mode():
             # reset
-            if count % 300 == 0:
+            if count % 30000 == 0:
                 count = 0
                 env.reset()
                 print("-" * 80)
@@ -233,18 +233,19 @@ def main():
 
                         # Create a dictionary to organize the forces by wheel
                         data_dict = {
-                            'wheel_1_Force_x': contact_forces_reshaped[0, 0],
-                            'wheel_1_Force_y': contact_forces_reshaped[0, 1],
-                            'wheel_1_Force_z': contact_forces_reshaped[0, 2],
-                            'wheel_2_Force_x': contact_forces_reshaped[1, 0],
-                            'wheel_2_Force_y': contact_forces_reshaped[1, 1],
-                            'wheel_2_Force_z': contact_forces_reshaped[1, 2],
-                            'wheel_3_Force_x': contact_forces_reshaped[2, 0],
-                            'wheel_3_Force_y': contact_forces_reshaped[2, 1],
-                            'wheel_3_Force_z': contact_forces_reshaped[2, 2],
-                            'wheel_4_Force_x': contact_forces_reshaped[3, 0],
-                            'wheel_4_Force_y': contact_forces_reshaped[3, 1],
-                            'wheel_4_Force_z': contact_forces_reshaped[3, 2],
+                            'Count': count,
+                            'fl_wheel_Force_x': contact_forces_reshaped[0, 0],
+                            'fl_wheel_Force_y': contact_forces_reshaped[0, 1],
+                            'fl_wheel_Force_z': contact_forces_reshaped[0, 2],
+                            'fr_wheel_Force_x': contact_forces_reshaped[1, 0],
+                            'fr_wheel_Force_y': contact_forces_reshaped[1, 1],
+                            'fr_wheel_Force_z': contact_forces_reshaped[1, 2],
+                            'bl_wheel_Force_x': contact_forces_reshaped[2, 0],
+                            'bl_wheel_Force_y': contact_forces_reshaped[2, 1],
+                            'bl_wheel_Force_z': contact_forces_reshaped[2, 2],
+                            'br_wheel_Force_x': contact_forces_reshaped[3, 0],
+                            'br_wheel_Force_y': contact_forces_reshaped[3, 1],
+                            'br_wheel_Force_z': contact_forces_reshaped[3, 2],
                         
                         }
 
@@ -266,10 +267,10 @@ def main():
                         print("Contact forces shape:", contact_forces.shape)
 
                         # Print forces for each wheel
-                        print("Wheel 1 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[0, 0], contact_forces_reshaped[0, 1], contact_forces_reshaped[0, 2]))
-                        print("Wheel 2 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[1, 0], contact_forces_reshaped[1, 1], contact_forces_reshaped[1, 2]))
-                        print("Wheel 3 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[2, 0], contact_forces_reshaped[2, 1], contact_forces_reshaped[2, 2]))
-                        print("Wheel 4 Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[3, 0], contact_forces_reshaped[3, 1], contact_forces_reshaped[3, 2]))
+                        print("FL_wheel Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[0, 0], contact_forces_reshaped[0, 1], contact_forces_reshaped[0, 2]))
+                        print("FR_wheel Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[1, 0], contact_forces_reshaped[1, 1], contact_forces_reshaped[1, 2]))
+                        print("BL_wheel Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[2, 0], contact_forces_reshaped[2, 1], contact_forces_reshaped[2, 2]))
+                        print("BR_wheel Contact Forces - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_forces_reshaped[3, 0], contact_forces_reshaped[3, 1], contact_forces_reshaped[3, 2]))
                         
                         # Calculate sum of forces in X, Y, and Z directions across all wheels
                         x_sum = contact_forces_reshaped[:, 0].sum()
@@ -295,18 +296,19 @@ def main():
 
 
                         data_dict_pos ={
-                            'wheel_1_Position_x': contact_positions_reshaped[0, 0],
-                            'wheel_1_Position_y': contact_positions_reshaped[0, 1],
-                            'wheel_1_Position_z': contact_positions_reshaped[0, 2],
-                            'wheel_2_Position_x': contact_positions_reshaped[1, 0],
-                            'wheel_2_Position_y': contact_positions_reshaped[1, 1],
-                            'wheel_2_Position_z': contact_positions_reshaped[1, 2],
-                            'wheel_3_Position_x': contact_positions_reshaped[2, 0],
-                            'wheel_3_Position_y': contact_positions_reshaped[2, 1],
-                            'wheel_3_Position_z': contact_positions_reshaped[2, 2],
-                            'wheel_4_Position_x': contact_positions_reshaped[3, 0],
-                            'wheel_4_Position_y': contact_positions_reshaped[3, 1],
-                            'wheel_4_Position_z': contact_positions_reshaped[3, 2],
+                            'Count': count,
+                            'fl_wheel_Position_x': contact_positions_reshaped[0, 0],
+                            'fl_wheel_Position_y': contact_positions_reshaped[0, 1],
+                            'fl_wheel_Position_z': contact_positions_reshaped[0, 2],
+                            'fr_wheel_Position_x': contact_positions_reshaped[1, 0],
+                            'fr_wheel_Position_y': contact_positions_reshaped[1, 1],
+                            'fr_wheel_Position_z': contact_positions_reshaped[1, 2],
+                            'bl_wheel_Position_x': contact_positions_reshaped[2, 0],
+                            'bl_wheel_Position_y': contact_positions_reshaped[2, 1],
+                            'bl_wheel_Position_z': contact_positions_reshaped[2, 2],
+                            'br_wheel_Position_x': contact_positions_reshaped[3, 0],
+                            'br_wheel_Position_y': contact_positions_reshaped[3, 1],
+                            'br_wheel_Position_z': contact_positions_reshaped[3, 2],
                         }
                         
                         contact_pos_df = pd.DataFrame([data_dict_pos])
@@ -321,15 +323,15 @@ def main():
 
                         print(f"Contact positions saved to {csv_filename_pos}")
 
-                        print("Contact positions shape:", contact_positions.shape())
+                        #print("Contact positions shape:", contact_positions.shape())
 
                         print("Contact positions:", contact_positions.tolist())  # Convert tensor to list for clean output
 
                         # Print positions for each wheel
-                        print("Wheel 1 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[0, 0], contact_positions_reshaped[0, 1], contact_positions_reshaped[0, 2]))
-                        print("Wheel 2 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[1, 0], contact_positions_reshaped[1, 1], contact_positions_reshaped[1, 2]))
-                        print("Wheel 3 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[2, 0], contact_positions_reshaped[2, 1], contact_positions_reshaped[2, 2]))
-                        print("Wheel 4 Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[3, 0], contact_positions_reshaped[3, 1], contact_positions_reshaped[3, 2]))
+                        print("FL_wheel Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[0, 0], contact_positions_reshaped[0, 1], contact_positions_reshaped[0, 2]))
+                        print("FR_wheel Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[1, 0], contact_positions_reshaped[1, 1], contact_positions_reshaped[1, 2]))
+                        print("BL_wheel Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[2, 0], contact_positions_reshaped[2, 1], contact_positions_reshaped[2, 2]))
+                        print("BR_wheel Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[3, 0], contact_positions_reshaped[3, 1], contact_positions_reshaped[3, 2]))
                         print("-" * 40)
 
                 except Exception as e:

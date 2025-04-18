@@ -36,18 +36,9 @@ HUSKY_CFG = ArticulationCfg(
         ),
         copy_from_source=False,
     ),
-    # init_state=ArticulationCfg.InitialStateCfg(
-    #     pos=(0.0, 0.0, 0.5),
-    #     joint_pos={
-    #         ".*": 0.0,
-    #     },
-    #     joint_vel={
-    #         "m1_joint": 200.0,
-    #         "m2_joint": -200.0,
-    #         "m3_joint": 200.0,
-    #         "m4_joint": -200.0,
-    #     },
-    # ),
+    init_state=ArticulationCfg.InitialStateCfg(
+        pos=(0.0, 0.0, 0.2),
+    ),
     actuators={
         "front_left_wheel": ActuatorBaseCfg(
             joint_names_expr="front_left_wheel",

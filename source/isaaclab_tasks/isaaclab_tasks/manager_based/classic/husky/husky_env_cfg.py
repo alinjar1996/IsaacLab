@@ -54,15 +54,18 @@ class HuskySceneCfg(InteractiveSceneCfg):
         physics_material=sim_utils.RigidBodyMaterialCfg(
             friction_combine_mode="multiply",
             restitution_combine_mode="multiply",
-            static_friction=1.0,
-            dynamic_friction=1.0,
+            static_friction=0.2,
+            dynamic_friction=0.2,
         ),
         debug_vis=False,
     )
 
 
-    # cartpole
+    # Husky
     robot: ArticulationCfg = HUSKY_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+
+    
+
 
     #sensors
 
@@ -70,7 +73,8 @@ class HuskySceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/Robot/.*_wheel_link", 
         update_period=0.01, 
         history_length=6, 
-        debug_vis=False
+        debug_vis=False,
+        track_pose=True
     )
 
     # lights
@@ -122,8 +126,8 @@ class EventCfg:
         mode="reset",
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel"]),
-            "position_range": (-1.0, 1.0),
-            "velocity_range": (-0.5, 0.5),
+            "position_range": (-3.0, 3.0),
+            "velocity_range": (-2.5, 2.5),
         },
     )
 
