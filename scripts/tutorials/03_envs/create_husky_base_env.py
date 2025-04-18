@@ -15,7 +15,9 @@ scene, action, observation and event managers to create an environment.
 
 """Launch Isaac Sim Simulator first."""
 
-import numpy as np
+import numpy
+from scipy.spatial.transform import Rotation as R
+
 import argparse
 
 from isaaclab.app import AppLauncher
@@ -170,6 +172,7 @@ import torch
 # Global variable to control whether to write the header
 header_written = False
 header_written_pos = False
+header_written_base = False
 
 import pandas as pd
 import torch
@@ -180,6 +183,7 @@ def main():
     """Main function."""
     global header_written
     global header_written_pos
+    global header_written_base
     # parse the arguments
     env_cfg = HuskyEnvCfg()
     env_cfg.scene.num_envs = args_cli.num_envs
@@ -188,6 +192,7 @@ def main():
     env = ManagerBasedEnv(cfg=env_cfg)
     force_sensor = True
     position_sensor = True
+    imu_sensor = True
 
     # simulate physics
     count = 0
@@ -333,9 +338,62 @@ def main():
                         print("BL_wheel Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[2, 0], contact_positions_reshaped[2, 1], contact_positions_reshaped[2, 2]))
                         print("BR_wheel Contact positions - X: {:.2f}, Y: {:.2f}, Z: {:.2f}".format(contact_positions_reshaped[3, 0], contact_positions_reshaped[3, 1], contact_positions_reshaped[3, 2]))
                         print("-" * 40)
+                    if imu_sensor == True:
+                        
+                        # Fetch the robot position and quaternion from the environment
+                        robot_pos = env.scene["imu_data"].data.pos_w
+                        robot_quat = env.scene["imu_data"].data.quat_w  # quaternion in [w, x, y, z]
+
+                        # Move the tensors to CPU before converting to NumPy arrays
+                        robot_pos_cpu = robot_pos.cpu().numpy()  # Move to CPU and convert to numpy
+                        robot_quat_cpu = robot_quat.cpu().numpy()  # Move to CPU and convert to numpy
+
+                        print("robot_pos_cpu", robot_pos_cpu)
+                        print("robot_quat_cpu", robot_quat_cpu)
+
+                        # Convert [w, x, y, z] to [x, y, z, w] format
+                        robot_quat_xyzw = numpy.array([robot_quat_cpu[0][1], robot_quat_cpu[0][2], robot_quat_cpu[0][3], robot_quat_cpu[0][0]])
+                        print("robot_quat_xyzw", robot_quat_xyzw)
+
+                        # Convert quaternion to roll-pitch-yaw (RPY) in radians
+                        robot_rpy = R.from_quat(robot_quat_xyzw).as_euler('xyz', degrees=False)
+
+                        # Reshape robot position (if needed)
+                        robot_pos_reshaped = robot_pos_cpu[0]
+
+                        # robot_rpy_cpu = robot_rpy (no need to move to CPU again, already in numpy format)
+                        robot_rpy_cpu = robot_rpy
+                        robot_rpy_reshaped = robot_rpy_cpu
+
+                        print("robot_rpy_reshaped", robot_rpy_reshaped)
+
+                        # Prepare data for saving to CSV
+                        data_dict_base = {
+                            'Count': count,  # Replace with actual count if necessary
+                            'Robot_Position_x': robot_pos_reshaped[0],
+                            'Robot_Position_y': robot_pos_reshaped[1],
+                            'Robot_Position_z': robot_pos_reshaped[2],
+                            'Robot_Orientation_roll': robot_rpy_reshaped[0],
+                            'Robot_Orientation_pitch': robot_rpy_reshaped[1],
+                            'Robot_Orientation_yaw': robot_rpy_reshaped[2],
+                        }
+
+                        # Create DataFrame
+                        base_pose_df = pd.DataFrame([data_dict_base])
+
+                        # Save to CSV
+                        csv_filename_base = 'base_pose.csv'
+                        with open(csv_filename_base, mode='a', newline='') as file:
+                            if not header_written_base:
+                                base_pose_df.to_csv(file, header=True, index=False)
+                                header_written_base = True
+                            else:
+                                base_pose_df.to_csv(file, header=False, index=False)
+
+                        print(f"Base Pose saved to {csv_filename_base}")
 
                 except Exception as e:
-                    print(f"Error accessing contact data: {e}")
+                    print(f"Error accessing data: {e}")
 
             # Increment counter
             count += 1
