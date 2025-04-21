@@ -193,6 +193,7 @@ def main():
     force_sensor = True
     position_sensor = True
     imu_sensor = True
+    surface_type = "flat"
 
     # simulate physics
     count = 0
@@ -205,13 +206,13 @@ def main():
                 print("-" * 80)
                 print("[INFO]: Resetting environment...")
             
-            # Sample random actions
-            joint_efforts = torch.full_like(env.action_manager.action, -10)
-            joint_efforts[:, [0, 2]] = -10.0  # left wheels
-            joint_efforts[:, [1, 3]] = 10.0   # right wheels
+            # ## Sample random actions
+            # joint_efforts = torch.full_like(env.action_manager.action, -10)
+            # joint_efforts[:, [0, 2]] = -10.0  # left wheels
+            # joint_efforts[:, [1, 3]] = 10.0   # right wheels
 
             # Inside while loop in main()
-            target_position = torch.full_like(env.action_manager.action, count * 0.0)  # slowly increases over time
+            target_position = torch.full_like(env.action_manager.action, count * -0.02)  # slowly increases over time
             obs, _ = env.step(target_position)
 
 
@@ -259,7 +260,8 @@ def main():
                         
 
                         # Open the CSV file in append mode, write header only once
-                        csv_filename = 'contact_forces.csv'
+                        csv_filename = f"contact_forces_{surface_type}.csv"
+                        #csv_filename = 'contact_forces.csv'
                         with open(csv_filename, mode='a', newline='') as file:
                             if not header_written:
                                 contact_forces_df.to_csv(file, header=True, index=False)
@@ -318,7 +320,8 @@ def main():
                         
                         contact_pos_df = pd.DataFrame([data_dict_pos])
 
-                        csv_filename_pos = 'contact_positions.csv'
+                        #csv_filename_pos = 'contact_positions.csv'
+                        csv_filename_pos = f"contact_positions_{surface_type}.csv"
                         with open(csv_filename_pos, mode='a', newline='') as file:
                             if not header_written_pos:
                                 contact_pos_df.to_csv(file, header=True, index=False)
@@ -382,7 +385,8 @@ def main():
                         base_pose_df = pd.DataFrame([data_dict_base])
 
                         # Save to CSV
-                        csv_filename_base = 'base_pose.csv'
+                        #csv_filename_base = 'base_pose.csv'
+                        csv_filename_base = f"base_pose_{surface_type}.csv"
                         with open(csv_filename_base, mode='a', newline='') as file:
                             if not header_written_base:
                                 base_pose_df.to_csv(file, header=True, index=False)

@@ -39,10 +39,10 @@ class HuskySceneCfg(InteractiveSceneCfg):
     """Configuration for a cart-pole scene."""
 
     #ground plane terrain
-    terrain = AssetBaseCfg(
-        prim_path="/World/ground",
-        spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
-    )
+    # terrain = AssetBaseCfg(
+    #     prim_path="/World/ground",
+    #     spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
+    # )
 
     # terrain = AssetBaseCfg(prim_path="/World/terrain_flat",
     #         spawn=sim_utils.UsdFileCfg(
@@ -68,20 +68,20 @@ class HuskySceneCfg(InteractiveSceneCfg):
 #     debug_vis=True,
 # )
     ## add terrain
-    # terrain = TerrainImporterCfg(
-    #     prim_path="/World/ground",
-    #     terrain_type="generator",
-    #     terrain_generator=FLAT_TERRAIN_CFG, #ROUGH_TERRAINS_CFG
-    #     max_init_terrain_level=5,
-    #     collision_group=-1,
-    #     physics_material=sim_utils.RigidBodyMaterialCfg(
-    #         friction_combine_mode="multiply",
-    #         restitution_combine_mode="multiply",
-    #         static_friction=0.2,
-    #         dynamic_friction=0.2,
-    #     ),
-    #     debug_vis=False,
-    # )
+    terrain = TerrainImporterCfg(
+        prim_path="/World/ground",
+        terrain_type="generator",
+        terrain_generator=FLAT_TERRAIN_CFG, #ROUGH_TERRAINS_CFG
+        max_init_terrain_level=5,
+        collision_group=-1,
+        physics_material=sim_utils.RigidBodyMaterialCfg(
+            friction_combine_mode="multiply",
+            restitution_combine_mode="multiply",
+            static_friction=0.2,
+            dynamic_friction=0.2,
+        ),
+        debug_vis=False,
+    )
 
 
     # Husky
