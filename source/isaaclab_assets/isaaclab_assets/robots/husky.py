@@ -37,7 +37,7 @@ HUSKY_CFG = ArticulationCfg(
         copy_from_source=False,
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.2),
+        pos=(0.0, 0.0, 0.5),
     ),
     actuators={
         "front_left_wheel": ActuatorBaseCfg(

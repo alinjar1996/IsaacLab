@@ -193,7 +193,8 @@ def main():
     force_sensor = True
     position_sensor = True
     imu_sensor = True
-    surface_type = "flat"
+    #surface_type = "flat"
+    surface_type = "slope"
 
     # simulate physics
     count = 0

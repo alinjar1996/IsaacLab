@@ -27,6 +27,7 @@ import isaaclab_tasks.manager_based.classic.husky.mdp as mdp
 from isaaclab_assets.robots.husky import HUSKY_CFG  # isort:skip
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 from isaaclab.terrains.config.flat import FLAT_TERRAIN_CFG
+from isaaclab.terrains.config.slope import SLOPE_TERRAIN_CFG
 
 
 ##
@@ -88,8 +89,6 @@ class HuskySceneCfg(InteractiveSceneCfg):
     robot: ArticulationCfg = HUSKY_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
     
-
-
     #sensors
 
     contact_forces = ContactSensorCfg(
