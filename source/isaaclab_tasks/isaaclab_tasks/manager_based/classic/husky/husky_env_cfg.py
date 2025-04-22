@@ -19,6 +19,7 @@ from isaaclab.utils import configclass
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.sensors import ContactSensorCfg, ImuCfg
 
+
 import isaaclab_tasks.manager_based.classic.husky.mdp as mdp
 
 ##
@@ -45,11 +46,15 @@ class HuskySceneCfg(InteractiveSceneCfg):
     #     spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
     # )
 
-    # terrain = AssetBaseCfg(prim_path="/World/terrain_flat",
-    #         spawn=sim_utils.UsdFileCfg(
-    #         usd_path=f"/home/ims/isaacsim/IsaacLab/terrain_description/terrain_flat.usd"),
-    #         debug_vis=True,
-    #     )
+    terrain = AssetBaseCfg(prim_path="/World/ground",
+            spawn=sim_utils.UsdFileCfg(
+            usd_path=f"/home/ims/isaacsim/IsaacLab/terrain_description/cube22.usd"),
+            init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, -10.0),
+            rot=(1.0, 0.0, 0.0, 0.0),  # example quaternion
+            ),
+            collision_group=-1,
+            debug_vis=True,
+        )
 #     terrain = AssetBaseCfg(
 #     prim_path="/World/terrain_flat",
 #     spawn=sim_utils.UsdFileCfg(
@@ -68,21 +73,21 @@ class HuskySceneCfg(InteractiveSceneCfg):
 #     ),
 #     debug_vis=True,
 # )
-    ## add terrain
-    terrain = TerrainImporterCfg(
-        prim_path="/World/ground",
-        terrain_type="generator",
-        terrain_generator=FLAT_TERRAIN_CFG, #ROUGH_TERRAINS_CFG
-        max_init_terrain_level=5,
-        collision_group=-1,
-        physics_material=sim_utils.RigidBodyMaterialCfg(
-            friction_combine_mode="multiply",
-            restitution_combine_mode="multiply",
-            static_friction=0.2,
-            dynamic_friction=0.2,
-        ),
-        debug_vis=False,
-    )
+    # ## add terrain
+    # terrain = TerrainImporterCfg(
+    #     prim_path="/World/ground",
+    #     terrain_type="generator",
+    #     terrain_generator=FLAT_TERRAIN_CFG, #ROUGH_TERRAINS_CFG
+    #     max_init_terrain_level=5,
+    #     collision_group=-1,
+    #     physics_material=sim_utils.RigidBodyMaterialCfg(
+    #         friction_combine_mode="multiply",
+    #         restitution_combine_mode="multiply",
+    #         static_friction=0.2,
+    #         dynamic_friction=0.2,
+    #     ),
+    #     debug_vis=False,
+    # )
 
 
     # Husky

@@ -18,6 +18,8 @@ from isaaclab.sim.schemas import schemas
 from isaaclab.sim.utils import export_prim_to_file
 
 
+
+
 class MeshConverter(AssetConverterBase):
     """Converter for a mesh file in OBJ / STL / FBX format to a USD file.
 

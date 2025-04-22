@@ -9,7 +9,7 @@ scene, action, observation and event managers to create an environment.
 
 .. code-block:: bash
 
-    ./isaaclab.sh -p scripts/tutorials/03_envs/create_husky_base_env.py --num_envs 32
+    ./isaaclab.sh -p scripts/tutorials/03_envs/create_husky_base_env.py --num_envs 1
 
 """
 
@@ -24,7 +24,7 @@ from isaaclab.app import AppLauncher
 
 
 # add argparse arguments
-parser = argparse.ArgumentParser(description="Tutorial on creating a cartpole base environment.")
+parser = argparse.ArgumentParser(description="Tutorial on creating a Husky base environment.")
 parser.add_argument("--num_envs", type=int, default=16, help="Number of environments to spawn.")
 
 # append AppLauncher cli args
@@ -193,8 +193,8 @@ def main():
     force_sensor = True
     position_sensor = True
     imu_sensor = True
-    #surface_type = "flat"
-    surface_type = "slope"
+    surface_type = "flat"
+    #surface_type = "slope"
 
     # simulate physics
     count = 0
