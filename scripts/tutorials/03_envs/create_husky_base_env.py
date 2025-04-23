@@ -213,7 +213,7 @@ def main():
             # joint_efforts[:, [1, 3]] = 10.0   # right wheels
 
             # Inside while loop in main()
-            target_position = torch.full_like(env.action_manager.action, count * -0.02)  # slowly increases over time
+            target_position = torch.full_like(env.action_manager.action, count * -0.2)  # slowly increases over time
             obs, _ = env.step(target_position)
 
 

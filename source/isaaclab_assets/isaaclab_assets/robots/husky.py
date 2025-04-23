@@ -28,16 +28,16 @@ HUSKY_CFG = ArticulationCfg(
             enable_gyroscopic_forces=True,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-            enabled_self_collisions=False,
+            enabled_self_collisions=True,
             solver_position_iteration_count=4,
-            solver_velocity_iteration_count=0,
+            solver_velocity_iteration_count=4,
             sleep_threshold=0.005,
             stabilization_threshold=0.001,
         ),
         copy_from_source=False,
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.5),
+        pos=(0.0, 0.0, 0.2),
     ),
     actuators={
         "front_left_wheel": ActuatorBaseCfg(

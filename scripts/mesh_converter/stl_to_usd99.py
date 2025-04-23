@@ -25,7 +25,7 @@ simulation_app = app_launcher.app
 
 from isaaclab.sim.converters.mesh_converter_cfg import MeshConverterCfg
 from isaaclab.sim.converters.mesh_converter import MeshConverter
-
+from isaaclab.sim.schemas import schemas_cfg
 # Create a global event loop for the entire application
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
@@ -52,7 +52,11 @@ def convert_stl_to_usd():
             scale=(1.0, 1.0, 1.0),
             translation=(0.0, 0.0, 0.0),
             rotation=(1.0, 0.0, 0.0, 0.0),
-            collision_approximation="convexDecomposition"
+            collision_approximation="convexDecomposition",
+            mass_props=schemas_cfg.MassPropertiesCfg(mass=100.0),
+            rigid_props=schemas_cfg.RigidBodyPropertiesCfg(rigid_body_enabled=True,
+                                                           disable_gravity=True,
+                                                           enable_gyroscopic_forces=True)
         )
         
         print("converter_cfg loaded")

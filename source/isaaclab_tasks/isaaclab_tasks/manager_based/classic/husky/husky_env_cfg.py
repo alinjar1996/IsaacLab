@@ -41,20 +41,20 @@ class HuskySceneCfg(InteractiveSceneCfg):
     """Configuration for a cart-pole scene."""
 
     #ground plane terrain
-    # terrain = AssetBaseCfg(
-    #     prim_path="/World/ground",
-    #     spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
-    # )
+    terrain = AssetBaseCfg(
+        prim_path="/World/ground",
+        spawn=sim_utils.GroundPlaneCfg(size=(100.0, 100.0)),
+    )
 
-    terrain = AssetBaseCfg(prim_path="/World/ground",
-            spawn=sim_utils.UsdFileCfg(
-            usd_path=f"/home/ims/isaacsim/IsaacLab/terrain_description/cube_4.usd"),
-            init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, -10.0),
-            rot=(1.0, 0.0, 0.0, 0.0),  # example quaternion
-            ),
-            collision_group=-1,
-            debug_vis=True,
-        )
+    # terrain = AssetBaseCfg(prim_path="/World/ground",
+    #         spawn=sim_utils.UsdFileCfg(
+    #         usd_path=f"/home/ims/isaacsim/IsaacLab/terrain_description/cube_4.usd"),
+    #         init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, -20.0),
+    #         rot=(1.0, 0.0, 0.0, 0.0),  # example quaternion
+    #         ),
+    #         collision_group=-1,
+    #         debug_vis=True,
+    #     )
 #     terrain = AssetBaseCfg(
 #     prim_path="/World/terrain_flat",
 #     spawn=sim_utils.UsdFileCfg(
