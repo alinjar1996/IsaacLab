@@ -29,8 +29,8 @@ from isaaclab_assets.robots.husky import HUSKY_CFG  # isort:skip
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 from isaaclab.terrains.config.flat import FLAT_TERRAIN_CFG
 from isaaclab.terrains.config.slope import SLOPE_TERRAIN_CFG
-
-
+from pxr import Usd, UsdGeom
+import omni.usd
 ##
 # Scene definition
 ##
@@ -48,7 +48,7 @@ class HuskySceneCfg(InteractiveSceneCfg):
 
     terrain = AssetBaseCfg(prim_path="/World/ground",
             spawn=sim_utils.UsdFileCfg(
-            usd_path=f"/home/ims/isaacsim/IsaacLab/terrain_description/cube22.usd"),
+            usd_path=f"/home/ims/isaacsim/IsaacLab/terrain_description/cube_4.usd"),
             init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, -10.0),
             rot=(1.0, 0.0, 0.0, 0.0),  # example quaternion
             ),

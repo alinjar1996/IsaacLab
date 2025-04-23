@@ -2,97 +2,81 @@
 # STL to USD Converter Script
 
 import os
-# import isaaclab.sim.converters.mesh_converter_cfg
-# import isaaclab.sim.converters.mesh_converter
-# from isaaclab.sim.converters.mesh_converter_cfg import MeshConverterCfg
-# from isaaclab.sim.converters.mesh_converter import MeshConverter
-
 import argparse
 from isaaclab.app import AppLauncher
 import asyncio
 
-
-
-# add argparse arguments
+# Add argparse arguments
 parser = argparse.ArgumentParser(description="Convert STL files to USD format")
-parser.add_argument("--stl_file", help="Path to the STL file to convert")
+parser.add_argument("--stl-file", help="Path to the STL file to convert")
 parser.add_argument("--output-dir", help="Directory to save the USD file (default: same as STL file)")
-parser.add_argument("--output-name", help="the USD file name")
-parser.add_argument("--no-instanceable", action="store_false", dest="make_instanceable",
-                    help="Don't make the USD asset instanceable")
-args = parser.parse_args()
-# append AppLauncher cli args
-AppLauncher.add_app_launcher_args(parser)
-# parse the arguments
+parser.add_argument("--output-name", help="The USD file name")
+parser.add_argument("--no-instanceable", action="store_false", dest="make_instanceable", help="Don't make the USD asset instanceable")
 
-# launch omniverse app
+# Append AppLauncher CLI args
+AppLauncher.add_app_launcher_args(parser)
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Launch omniverse app
 app_launcher = AppLauncher(args)
 simulation_app = app_launcher.app
 
 from isaaclab.sim.converters.mesh_converter_cfg import MeshConverterCfg
 from isaaclab.sim.converters.mesh_converter import MeshConverter
 
+# Create a global event loop for the entire application
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
-
-
-async def convert_stl_to_usd(stl_file_path, output_name, output_dir=None, make_instanceable=True):
-    """
-    Convert an STL file to USD format using MeshConverter.
-    
-    Args:
-        stl_file_path (str): Path to the STL file to convert
-        output_dir (str, optional): Directory to save the USD file in. If None, uses the same directory as the STL file.
-        make_instanceable (bool): Whether to make the resulting USD instanceable. Default is True.
-        
-    Returns:
-        str: Path to the generated USD file
-    """
-    # Validate input path
-    if not os.path.exists(stl_file_path):
-        raise FileNotFoundError(f"STL file not found: {stl_file_path}")
-    
-    # If no output directory specified, use the same directory as the input file
-    if output_dir is None:
-        output_dir = os.path.dirname(stl_file_path)
-
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Configure the converter
-    converter_cfg = MeshConverterCfg(
-        # Path to the STL file
-        asset_path=stl_file_path,
-        # Output directory for the USD file
-        usd_dir=output_dir,
-        usd_file_name=output_name,
-        # Make the USD asset instanceable
-        make_instanceable=make_instanceable,
-        # Scaling - default is (1.0, 1.0, 1.0)
-        scale=(1.0, 1.0, 1.0),
-        # Translation if needed - default is (0.0, 0.0, 0.0)
-        translation=(0.0, 0.0, 0.0),
-        # Rotation as quaternion (w, x, y, z) - default is (1.0, 0.0, 0.0, 0.0) (no rotation)
-        rotation=(1.0, 0.0, 0.0, 0.0),
-        # Set collision approximation (can be "convexHull", "convexDecomposition", or "meshSimplification")
-        collision_approximation="convexHull"
-    )
-    
-    # Create and run the converter
-    converter = MeshConverter(cfg=converter_cfg)
-    await converter._convert_mesh_to_usd(stl_file_path,output_name)
-    
-    # Return the path to the generated USD file
-    return converter.usd_path
-
-if __name__ == "__main__":
+def convert_stl_to_usd():
     try:
-        usd_path = asyncio.run(convert_stl_to_usd(
-            args.stl_file, 
-            args.output_name,
-            args.output_dir, 
-            args.make_instanceable
-        ))
-        print(f"Successfully converted STL to USD: {usd_path}")
+        # Ensure the input file (STL) and output file (USD) are provided
+        output_file_path = args.output_dir if args.output_dir else os.path.dirname(args.stl_file)
+        output_file_name = args.output_name
+        
+        # Validate input path
+        if not os.path.exists(args.stl_file):
+            raise FileNotFoundError(f"STL file not found: {args.stl_file}")
+        
+        # Create output directory if it doesn't exist
+        os.makedirs(output_file_path, exist_ok=True)
+        
+        # Configure the converter
+        converter_cfg = MeshConverterCfg(
+            asset_path=args.stl_file,
+            usd_dir=output_file_path,
+            usd_file_name=output_file_name,
+            make_instanceable=True,
+            scale=(1.0, 1.0, 1.0),
+            translation=(0.0, 0.0, 0.0),
+            rotation=(1.0, 0.0, 0.0, 0.0),
+            collision_approximation="convexDecomposition"
+        )
+        
+        print("converter_cfg loaded")
+        
+        # Create the converter
+        converter = MeshConverter(cfg=converter_cfg)
+        
+        # Run the async method in the loop
+        loop.run_until_complete(converter._convert_mesh_to_usd(args.stl_file, output_file_name))
+        
+        print(f"Successfully converted STL to USD at: {output_file_path}/{output_file_name}")
+        
     except Exception as e:
         print(f"Error converting STL to USD: {e}")
+    finally:
+        # Close the simulation app after the process is done
+        simulation_app.close()
 
+if __name__ == "__main__":
+    print("_Start 12345")
+    try:
+        print("Main_Start")
+        convert_stl_to_usd()
+        print("Main_Stop")
+    finally:
+        loop.close()
+    print("_End 12345")
